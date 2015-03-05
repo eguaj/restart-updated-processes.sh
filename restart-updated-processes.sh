@@ -219,6 +219,9 @@ function profile_restart {
 	/usr/sbin/VBoxService)
 	    echo_service virtualbox-guest-utils restart
 	    ;;
+	/usr/lib/virtualbox/vboxwebsrv)
+	    echo_service vboxweb-service restart
+	    ;;
 	/usr/sbin/nullmailer-send)
 	    echo_service nullmailer restart
 	    ;;
