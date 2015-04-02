@@ -238,6 +238,9 @@ function profile_restart {
 	/sbin/dhclient|/sbin/dhclient3)
 	    echo_intf_restart "$CMDLINE"
 	    ;;
+	/usr/bin/whoopsie)
+	    echo_kill "$PID"
+	    ;;
 	/sbin/init)
 	    ;;
 	sshd:)
