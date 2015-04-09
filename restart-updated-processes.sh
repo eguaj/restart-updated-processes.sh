@@ -99,6 +99,10 @@ function profile_restart {
 	    echo_service xe-linux-distribution restart
 	    return
 	    ;;
+	*/usr/sbin/snmptt*)
+	    echo_service snmptt restart
+	    return
+	    ;;
     esac
 
     case "$BIN" in
