@@ -245,6 +245,12 @@ function profile_restart {
 	/usr/bin/whoopsie)
 	    echo_kill "$PID"
 	    ;;
+	/usr/sbin/in.tftpd)
+	    echo_service tftpd-hpa restart
+	    ;;
+	/usr/sbin/pxe)
+	    echo_service pxe restart
+	    ;;
 	/sbin/init)
 	    ;;
 	sshd:)
