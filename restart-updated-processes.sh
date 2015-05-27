@@ -2,6 +2,18 @@
 
 shopt -s nullglob
 
+function usage {
+    local ME=$(basename "$0")
+    cat <<EOF
+
+Usage:
+
+    $ME <login@host.name> ['restart']
+    $ME --apt-dater <groupName>|'*' ['restart']
+
+EOF
+}
+
 function check_compatibility {
     local DISTRIB=$(lsb_release -s -i)-$(lsb_release -s -r)
     case $DISTRIB in
@@ -10,7 +22,7 @@ function check_compatibility {
 	Ubuntu-14.04*)
 	    ;;
 	*)
-	    printf "Error: unsupported distribution '%s'.\n" "$DISTRIB"
+	    printf "Error: unsupported distribution '%s'.\n" "$DISTRIB" 1>&2
 	    exit 1
     esac
 }
@@ -263,7 +275,7 @@ function profile_restart {
     esac
 }
 
-function main {
+function main_inject {
     check_compatibility
     COMMAND=$1
     declare -A DONE
@@ -289,5 +301,83 @@ function main {
     done
 }
 
-main "$@"
+function restart_updated_single_host {
+    if [ $# -eq 0 ]; then
+	usage
+	return 1
+    fi
+    ssh "$1" /bin/bash /dev/stdin "--inject" "$2" < "$0"
+}
 
+function get_apt_dater_hosts {
+    type -p php > /dev/null
+    if [ $? -ne 0 ]; then
+	printf "Missing required 'php' command!\n" 1>&2
+	return 1
+    fi
+    php -r '
+ini_set("error_log", null);
+$ini = file_get_contents($argv[1]);
+$ini = preg_replace("/;/", ",", $ini);
+$ini = parse_ini_string($ini, true);
+$groups = array();
+foreach ($ini as $group => $conf) {
+    $hosts = array();
+    foreach ($conf as $k => $v) {
+	if ($k == "Hosts") {
+	    $hosts = preg_split("/\s*,\s*/", $v);
+	    break;
+	}
+    }
+    $groups[$group] = $hosts;
+}
+if (!isset($argv[2]) || $argv[2] == "") {
+    foreach ($groups as $group => $hosts) {
+	error_log(sprintf("\"%s\":", $group));
+	foreach ($hosts as $host) {
+	    error_log(sprintf("\t%s", $host));
+	}
+    }
+    exit(1);
+} else {
+    foreach ($groups as $group => $hosts) {
+	if ($group != $argv[2] && $argv[2] != "*") {
+	    continue;
+	}
+	foreach ($hosts as $host) {
+	    printf("%s\n", $host);
+	}
+    }
+}
+    ' ~/.config/apt-dater/hosts.conf "$1"
+}
+
+function restart_updated_apt_dater_group {
+    local HOSTS=($(get_apt_dater_hosts "$1"))
+    for H in ${HOSTS[@]}; do
+	printf "[+] Processing host \"%s\"\n" "$H"
+	restart_updated_single_host "$H" "$2"
+    done
+}
+
+function main {
+    case "$1" in
+	--help)
+	    usage
+	    return 1
+	    ;;
+	--inject)
+	    shift
+	    main_inject "$@"
+	    ;;
+	--apt-dater)
+	    shift
+	    restart_updated_apt_dater_group "$@"
+	    ;;
+	*)
+	    restart_updated_single_host "$@"
+	    ;;
+    esac
+}
+
+main "$@"

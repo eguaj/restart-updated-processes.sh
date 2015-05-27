@@ -18,7 +18,7 @@ Ubuntu 14.04 LTS.
 
 Default mode is to scan the processes and report what would be done:
 
-    # ./restart-updated-processes.sh
+    # ./restart-updated-processes.sh root@www.example.net
     [...]
     18881   /usr/lib/postgresql/9.1/bin/postgres [/usr/lib/postgresql/9.1/bin/postgres -D /var/lib/postgresql/9.1/main -c config_file=/etc/postgresql/9.1/main/postgresql.conf ]
             # service postgresql restart
@@ -35,7 +35,7 @@ Default mode is to scan the processes and report what would be done:
 
 To effectively restart the processes, use the `restart` argument:
 
-    # ./restart-updated-processes.sh restart
+    # ./restart-updated-processes.sh root@www.example.net restart
     [...]
     18881   /usr/lib/postgresql/9.1/bin/postgres [/usr/lib/postgresql/9.1/bin/postgres -D /var/lib/postgresql/9.1/main -c config_file=/etc/postgresql/9.1/main/postgresql.conf ]
     restart postgresql
@@ -55,10 +55,32 @@ To effectively restart the processes, use the `restart` argument:
     626 /sbin/getty [/sbin/getty -8 38400 tty4 ]
     [...]
 
-The script can also be executed "on-the-fly" on a remote machine without first
-copying it locally:
+If you use [`apt-dater`](https://www.ibh.de/apt-dater/) to manage/upgrade your
+hosts, you can use the `apt-dater`'s groups.
 
-    $ cat restart-updated-processes.sh | ssh root@server.example.net /bin/bash /dev/stdin
-    
-    $ cat restart-updated-processes.sh | ssh root@server.example.net /bin/bash /dev/stdin restart
+List `apt-dater`'s groups:
+
+    # ./restart-updated-processes.sh --apt-dater
+    "Frontend servers":
+            www1.example.net
+            www2.example.net
+    "Backend servers":
+            back1.example.net
+            back2.example.net
+
+Apply to a specific `apt-dater`'s group:
+
+    # ./restart-updated-processes.sh --apt-dater "Frontend servers"
+
+    # ./restart-updated-processes.sh --apt-dater "Frontend servers" restart
+
+Apply to all `apt-dater`'s groups:
+
+    # ./restart-updated-processes.sh --apt-dater "*"
+
+    # ./restart-updated-processes.sh --apt-dater "*" restart
+
+To run locally (i.e. without passing through SSH) use the `--inject` argument:
+
+    # ./restart-updated-processes.sh --inject
 
