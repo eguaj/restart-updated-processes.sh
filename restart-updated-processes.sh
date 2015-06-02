@@ -133,6 +133,9 @@ function profile_restart {
 	/usr/sbin/pcscd)
 	    echo_service pcscd restart
 	    ;;
+	tlsmgr*)
+	    echo_service postfix restart
+	    ;;
 	/usr/lib/postfix/master)
 	    echo_service postfix restart
 	    ;;
@@ -193,7 +196,7 @@ function profile_restart {
 	/usr/sbin/dhcpd)
 	    echo_service isc-dhcp-server restart
 	    ;;
-	proftpd:)
+	proftpd:*)
 	    echo_service proftpd restart
 	    ;;
 	/sbin/rpcbind)
@@ -262,6 +265,9 @@ function profile_restart {
 	    ;;
 	/usr/sbin/pxe)
 	    echo_service pxe restart
+	    ;;
+	/usr/sbin/snmpd)
+	    echo_service snmpd restart
 	    ;;
 	/sbin/init)
 	    ;;
