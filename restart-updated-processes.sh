@@ -127,6 +127,9 @@ function profile_restart {
 	/usr/lib/ipsec/pluto)
 	    echo_service ipsec restart
 	    ;;
+	/usr/lib/ipsec/charon)
+	    echo_service ipsec restart
+	    ;;
 	/usr/sbin/dnsmasq)
 	    echo_service dnsmasq restart
 	    ;;
