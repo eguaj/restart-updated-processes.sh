@@ -163,6 +163,9 @@ function profile_restart {
 	/usr/sbin/zabbix_server)
 	    echo_service zabbix-server restart
 	    ;;
+	/usr/sbin/smokeping*)
+	    echo_service smokeping restart
+	    ;;
 	/usr/sbin/atd)
 	    echo_service atd restart
 	    ;;
@@ -221,6 +224,12 @@ function profile_restart {
 	    echo_service udev restart
 	    ;;
 	/bin/dbus-daemon)
+	    echo_service dbus restart
+	    ;;
+	/usr/sbin/console-kit-daemon)
+	    echo_service dbus restart
+	    ;;
+	/usr/lib/policykit-1/polkitd)	
 	    echo_service dbus restart
 	    ;;
 	/usr/bin/memcached)
