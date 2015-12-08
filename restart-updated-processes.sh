@@ -115,6 +115,10 @@ function profile_restart {
 	    echo_service snmptt restart
 	    return
 	    ;;
+	*/openntpd/*)
+	    echo_service openntpd restart
+	    return
+	    ;;
     esac
 
     case "$BIN" in
@@ -204,6 +208,9 @@ function profile_restart {
 	    ;;
 	proftpd:*)
 	    echo_service proftpd restart
+	    ;;
+	pure-ftpd*)
+	    echo_service pure-ftpd restart
 	    ;;
 	/sbin/rpcbind)
 	    echo_service portmap restart
