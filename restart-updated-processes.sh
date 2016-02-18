@@ -33,26 +33,31 @@ function echo_service {
     if [ -z "$OP" ]; then
 	OP="restart"
     fi
+    echo -n "$FG_YELLOW"
     if [ "$COMMAND" = "restart" ]; then
 	echo "$OP" "$NAME"
 	service "$NAME" "$OP"
     else
 	printf "\t# service %s %s\n" "$NAME" "$OP"
     fi
+    echo -n "$COLOR_RESET"
 }
 
 function echo_kill {
     local PID=$1
+    echo -n "$FG_YELLOW"
     if [ "$COMMAND" = "restart" ]; then
 	kill "$PID"
     else
 	printf "\t# kill %s\n" "$PID"
     fi
+    echo -n "$COLOR_RESET"
 }
 
 function echo_run {
     local CMD=$1
     shift
+    echo -n "$FG_YELLOW"
     if [ "$COMMAND" = "restart" ]; then
 	"$CMD" "$@" &
     else
@@ -63,15 +68,17 @@ function echo_run {
 	done
 	printf "\t# %s %s\n" "$CMD" "$ARGS"
     fi
+    echo -n "$COLOR_RESET"
 }
 
 function echo_intf_restart {
     local CMDLINE=$1
     local INTF=$(echo "$CMDLINE" | awk '{print $(NF)}')
     if [ -z "$INTF" ]; then
-	printf "\t\t*** dhclient interface not found ***\n"
+	printf "\t\t%s*** dhclient interface not found ***%s\n" "$FG_RED" "$COLOR_RESET"
 	return
     fi
+    echo -n "$FG_YELLOW"
     if [ "$COMMAND" = "restart" ]; then
 	ifdown "$INTF"
 	ifup "$INTF"
@@ -79,6 +86,7 @@ function echo_intf_restart {
 	printf "\t# ifdown %s\n" "$INTF"
 	printf "\t# ifup   %s\n" "$INTF"
     fi
+    echo -n "$COLOR_RESET"
 }
 
 function profile_restart {
@@ -91,7 +99,7 @@ function profile_restart {
 	return
     fi
 
-    printf "%s\t%s [%s]\n" "$PID" "$BIN" "$CMDLINE"
+    printf "%s%s\t%s [%s]%s\n" "$FG_BLUE" "$PID" "$BIN" "$CMDLINE" "$COLOR_RESET"
 
     case "$CMDLINE" in
 	*/BackupPC\ *)
@@ -166,6 +174,9 @@ function profile_restart {
 	    ;;
 	/usr/sbin/zabbix_server)
 	    echo_service zabbix-server restart
+	    ;;
+	/usr/sbin/nagios3)
+	    echo_service nagios3 restart
 	    ;;
 	/usr/sbin/smokeping*)
 	    echo_service smokeping restart
@@ -288,6 +299,9 @@ function profile_restart {
 	/usr/sbin/snmpd)
 	    echo_service snmpd restart
 	    ;;
+	/usr/sbin/smartd)
+	    echo_service smartd restart
+	    ;;
 	/sbin/init)
 	    ;;
 	sshd:)
@@ -295,7 +309,7 @@ function profile_restart {
 	"")
 	    ;;
 	*)
-	    printf "\t\t*** unknown ***\n"
+	    printf "\t\t%s*** unknown ***%s\n" "$FG_RED" "$COLOR_RESET"
 	    ;;
     esac
 }
@@ -331,7 +345,7 @@ function restart_updated_single_host {
 	usage
 	return 1
     fi
-    ssh "$1" /bin/bash /dev/stdin "--inject" "$2" < "$0"
+    ssh -o ConnectTimeout=5 "$1" /bin/bash /dev/stdin "--inject" "$2" < "$0"
 }
 
 function get_apt_dater_hosts {
@@ -385,7 +399,16 @@ function restart_updated_apt_dater_group {
     done
 }
 
+function define_colors {
+    FG_RED=$(echo -e '\x1b[31m')
+    FG_GREEN=$(echo -e '\x1b[32m')
+    FG_YELLOW=$(echo -e '\x1b[33m')
+    FG_BLUE=$(echo -e '\x1b[34m')
+    COLOR_RESET=$(echo -e '\x1b[0m')
+}
+
 function main {
+    define_colors
     case "$1" in
 	--help)
 	    usage
