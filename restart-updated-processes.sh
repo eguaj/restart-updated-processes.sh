@@ -154,6 +154,9 @@ function profile_restart {
 	/usr/lib/postfix/master)
 	    echo_service postfix restart
 	    ;;
+	/usr/sbin/exim4)
+	    echo_service exim4 restart
+	    ;;
 	/usr/sbin/acpid)
 	    echo_service acpid restart
 	    ;;
@@ -429,3 +432,4 @@ function main {
 }
 
 main "$@"
+
