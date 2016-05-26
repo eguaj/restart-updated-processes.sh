@@ -151,6 +151,9 @@ function profile_restart {
 	tlsmgr*)
 	    echo_service postfix restart
 	    ;;
+	/usr/sbin/dovecot)
+	    echo_service dovecot restart
+	    ;;
 	/usr/lib/postfix/master)
 	    echo_service postfix restart
 	    ;;
