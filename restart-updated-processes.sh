@@ -308,6 +308,9 @@ function profile_restart {
 	/usr/sbin/smartd)
 	    echo_service smartd restart
 	    ;;
+	/usr/bin/monit)
+	    echo_service monit restart
+	    ;;
 	/sbin/init)
 	    ;;
 	sshd:)
