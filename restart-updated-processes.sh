@@ -116,7 +116,7 @@ function profile_restart {
 	    return
 	    ;;
 	*/usr/sbin/xe-daemon*)
-	    echo_service xe-linux-distribution restart
+	    echo_kill "$PID"
 	    return
 	    ;;
 	*/usr/sbin/snmptt*)
