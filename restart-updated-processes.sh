@@ -115,10 +115,6 @@ function profile_restart {
 	    echo_service ted restart
 	    return
 	    ;;
-	*/usr/sbin/xe-daemon*)
-	    echo_kill "$PID"
-	    return
-	    ;;
 	*/usr/sbin/snmptt*)
 	    echo_service snmptt restart
 	    return
