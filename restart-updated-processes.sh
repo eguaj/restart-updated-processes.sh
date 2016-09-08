@@ -10,6 +10,7 @@ Usage:
 
     $ME <login@host.name> ['restart']
     $ME --apt-dater <groupName>|'*' ['restart']
+    $ME --apt-dater-exec <groupName>|'*' <program> [arguments]
 
 EOF
 }
@@ -405,6 +406,22 @@ function restart_updated_apt_dater_group {
     done
 }
 
+function exec_apt_dater_group {
+    local HOSTS=($(get_apt_dater_hosts "$1"))
+    local RET=0
+    shift
+    for H in ${HOSTS[@]}; do
+	printf "[+] Processing host \"%s\"\n" "$H"
+	echo -n "$FG_BLUE"
+	ssh "$H" "$@"
+	RET=$?
+	if [ $RET -ne 0 ]; then
+	    printf "\t%s*** error (%d) ***\n" "$FG_RED" "$RET"
+	fi
+	echo -n "$COLOR_RESET"
+    done
+}
+
 function define_colors {
     FG_RED=$(echo -e '\x1b[31m')
     FG_GREEN=$(echo -e '\x1b[32m')
@@ -427,6 +444,10 @@ function main {
 	--apt-dater)
 	    shift
 	    restart_updated_apt_dater_group "$@"
+	    ;;
+	--apt-dater-exec)
+	    shift
+	    exec_apt_dater_group "$@"
 	    ;;
 	*)
 	    restart_updated_single_host "$@"
