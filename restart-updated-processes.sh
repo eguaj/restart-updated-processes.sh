@@ -366,6 +366,7 @@ function get_apt_dater_hosts {
     php -r '
 ini_set("error_log", null);
 $ini = file_get_contents($argv[1]);
+$ini = preg_replace("/^\\s*#.*\$/m", "", $ini);
 $ini = preg_replace("/;/", ",", $ini);
 $ini = parse_ini_string($ini, true);
 $groups = array();
