@@ -356,7 +356,7 @@ function restart_updated_single_host {
     ssh -o ConnectTimeout=5 "$1" /bin/bash /dev/stdin "--inject" "$2" < "$0"
 }
 
-function get_apt_dater_hosts {
+function get_apt_dater_hosts_conf {
     type -p php > /dev/null
     if [ $? -ne 0 ]; then
 	printf "Missing required 'php' command!\n" 1>&2
@@ -398,6 +398,66 @@ if (!isset($argv[2]) || $argv[2] == "") {
     }
 }
     ' ~/.config/apt-dater/hosts.conf "$1"
+}
+
+function gen_apt_dater_hosts_xslt {
+    cat <<'EOF'
+<?xml version="1.0"?>
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+    <xsl:output method="text" omit-xml-declaration="yes" indent="no"/>
+	<xsl:template match="/">
+	    <xsl:for-each select="hosts/group">
+		<xsl:variable name="current-group" select="."/>
+		<xsl:for-each select="host">
+		    <xsl:value-of select="$current-group/@name"/>                     <!-- group name -->
+		    <xsl:text>&#x09;</xsl:text>                                       <!-- \t         -->
+		    <xsl:value-of select="@ssh-user"/>@<xsl:value-of select="@name"/> <!-- user@host  -->
+		    <xsl:text>&#x0a;</xsl:text>                                       <!-- \n         -->
+		</xsl:for-each>
+	    </xsl:for-each>
+	</xsl:template>
+</xsl:stylesheet>
+EOF
+}
+
+function run_apt_dater_hosts_xslt {
+    xsltproc <(gen_apt_dater_hosts_xslt) ~/.config/apt-dater/hosts.xml
+}
+
+function get_apt_dater_hosts_xml {
+    local CUR_GROUP
+    if [ -z "$1" ]; then
+	run_apt_dater_hosts_xslt \
+	| (
+	    IFS=$'\t'
+	    while read GROUP HOST; do
+		if [ "$CUR_GROUP" != "$GROUP" ]; then
+		    printf "\"%s\":\n" "$GROUP"
+		    CUR_GROUP=$GROUP
+		fi
+		printf "\t%s\n" "$HOST"
+	    done
+	) 1>&2
+    else
+	run_apt_dater_hosts_xslt \
+	| (
+	    IFS=$'\t'
+	    while read GROUP HOST; do
+		if [ "$GROUP" != "$1" -a "$1" != "*" ]; then
+		    continue
+		fi
+		printf "%s\n" "$HOST"
+	    done
+	)
+    fi
+}
+
+function get_apt_dater_hosts {
+    if [ -f ~/.config/apt-dater/hosts.xml ]; then
+	get_apt_dater_hosts_xml "$@"
+    else
+	get_apt_dater_hosts_conf "$@"
+    fi
 }
 
 function restart_updated_apt_dater_group {
