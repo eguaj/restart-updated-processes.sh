@@ -174,6 +174,9 @@ function profile_restart {
 	postgres:|*postgresql*)
 	    echo_service postgresql restart
 	    ;;
+	/usr/bin/mongod)
+	    echo_service mongod restart
+	    ;;
 	/usr/sbin/zabbix_agentd)
 	    echo_service zabbix-agent restart
 	    ;;
