@@ -9,8 +9,15 @@ function usage {
 Usage:
 
     $ME <login@host.name> ['restart']
+
     $ME --apt-dater <groupName>|'*' ['restart']
+
     $ME --apt-dater-exec <groupName>|'*' <program> [arguments]
+
+    $ME --apt-dater-local-exec <groupName>|'*' <localProgram> [localArguments]
+
+	- Occurences of '{}' in localprogram or localArguments will be replaced
+	  by the current 'login@host.name' being processed.
 
 EOF
 }
@@ -471,7 +478,7 @@ function restart_updated_apt_dater_group {
     done
 }
 
-function exec_apt_dater_group {
+function apt_dater_exec_group {
     local HOSTS=($(get_apt_dater_hosts "$1"))
     local RET=0
     shift
@@ -479,6 +486,32 @@ function exec_apt_dater_group {
 	printf "[+] Processing host \"%s\"\n" "$H"
 	echo -n "$FG_BLUE"
 	ssh "$H" "$@"
+	RET=$?
+	if [ $RET -ne 0 ]; then
+	    printf "\t%s*** error (%d) ***\n" "$FG_RED" "$RET"
+	fi
+	echo -n "$COLOR_RESET"
+    done
+}
+
+function apt_dater_local_exec_group {
+    local HOSTS=($(get_apt_dater_hosts "$1"))
+    local RET=0
+    shift
+    for H in ${HOSTS[@]}; do
+	printf "[+] Processing host \"%s\"\n" "$H"
+	echo -n "$FG_BLUE"
+	# Search and expand {} in arguments
+	local ARGS=("$@")
+	local I=0
+	while [ $I -lt ${#ARGS[@]} ]; do
+	    if [ ${ARGS[$I]} == "{}" ]; then
+		ARGS[$I]="$H"
+	    fi
+	    ARGS[$I]=$(printf "%q" "${ARGS[$I]}")
+	    I=$(($I+1))
+	done
+	"${ARGS[@]}"
 	RET=$?
 	if [ $RET -ne 0 ]; then
 	    printf "\t%s*** error (%d) ***\n" "$FG_RED" "$RET"
@@ -512,7 +545,11 @@ function main {
 	    ;;
 	--apt-dater-exec)
 	    shift
-	    exec_apt_dater_group "$@"
+	    apt_dater_exec_group "$@"
+	    ;;
+	--apt-dater-local-exec)
+	    shift
+	    apt_dater_local_exec_group "$@"
 	    ;;
 	*)
 	    restart_updated_single_host "$@"
