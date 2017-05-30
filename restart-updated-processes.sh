@@ -16,8 +16,10 @@ Usage:
 
     $ME --apt-dater-local-exec <groupName>|'*' <localProgram> [localArguments]
 
-	- Occurences of '{}' in localprogram or localArguments will be replaced
-	  by the current 'login@host.name' being processed.
+	Occurences of '{}' in localProgram or localArguments will be replaced
+	by the current 'login@host.name' being processed.
+
+	E.g.: --apt-dater-local-exec scp /some/file.txt {}:/remote/file.txt
 
 EOF
 }
@@ -505,10 +507,7 @@ function apt_dater_local_exec_group {
 	local ARGS=("$@")
 	local I=0
 	while [ $I -lt ${#ARGS[@]} ]; do
-	    if [ ${ARGS[$I]} == "{}" ]; then
-		ARGS[$I]="$H"
-	    fi
-	    ARGS[$I]=$(printf "%q" "${ARGS[$I]}")
+	    ARGS[$I]=$(printf "%q" $(perl -e '$ARGV[0] =~s /{}/${ARGV[1]}/g; printf("%s\n", $ARGV[0])' "${ARGS[$I]}" "$H"))
 	    I=$(($I+1))
 	done
 	"${ARGS[@]}"
