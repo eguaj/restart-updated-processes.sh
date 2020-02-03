@@ -427,10 +427,19 @@ function gen_apt_dater_hosts_xslt {
 	    <xsl:for-each select="hosts/group">
 		<xsl:variable name="current-group" select="."/>
 		<xsl:for-each select="host">
-		    <xsl:value-of select="$current-group/@name"/>                     <!-- group name -->
-		    <xsl:text>&#x09;</xsl:text>                                       <!-- \t         -->
-		    <xsl:value-of select="@ssh-user"/>@<xsl:value-of select="@name"/> <!-- user@host  -->
-		    <xsl:text>&#x0a;</xsl:text>                                       <!-- \n         -->
+		    <xsl:value-of select="$current-group/@name"/> <!-- group name -->
+		    <xsl:text>&#x09;</xsl:text>                   <!-- "\t"       -->
+                    <xsl:choose>
+                        <xsl:when test="not(@ssh-user)">
+		            <xsl:text>root</xsl:text>             <!-- "root"     -->
+                        </xsl:when>
+                        <xsl:otherwise>
+		            <xsl:value-of select="@ssh-user"/>    <!-- user       -->
+                        </xsl:otherwise>
+                    </xsl:choose>
+                    <xsl:text>@</xsl:text>                        <!-- "@"        -->
+                    <xsl:value-of select="@name"/>                <!-- hostname   -->
+		    <xsl:text>&#x0a;</xsl:text>                   <!-- "\n"       -->
 		</xsl:for-each>
 	    </xsl:for-each>
 	</xsl:template>
