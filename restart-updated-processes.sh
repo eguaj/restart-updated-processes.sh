@@ -31,7 +31,13 @@ function check_compatibility {
 	    ;;
 	Ubuntu-14.04*)
 	    ;;
+	Ubuntu-16.04*)
+	    ;;
 	Debian-7.*)
+	    ;;
+	Debian-8.*)
+	    ;;
+	Debian-9.*)
 	    ;;
 	*)
 	    printf "Error: unsupported distribution '%s'.\n" "$DISTRIB" 1>&2
